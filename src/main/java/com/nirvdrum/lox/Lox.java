@@ -50,10 +50,15 @@ public class Lox {
     private static void run(String source) {
         var scanner = new Scanner(source);
         var tokens = scanner.scanTokens();
+        var parser = new Parser(tokens);
+        var expression = parser.parse();
 
-        for (var token : tokens) {
-            System.out.println(token);
+        // Stop if there was a syntax error.
+        if (hadError) {
+            return;
         }
+
+        System.out.println(new AstPrinter().print(expression));
     }
 
     static void error(int line, String message) {
@@ -64,5 +69,13 @@ public class Lox {
         System.err.println(String.format("[line %d] Error %s: %s", line, where, message));
 
         hadError = true;
+    }
+
+    static void error(Token token, String message) {
+        if (token.type() == TokenType.EOF) {
+            report(token.line(), " at end", message);
+        } else {
+            report(token.line(), " at '" + token.lexeme() + "'", message);
+        }
     }
 }
