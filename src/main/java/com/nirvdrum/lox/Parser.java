@@ -1,6 +1,6 @@
 package com.nirvdrum.lox;
 
-import javax.swing.text.html.parser.AttributeList;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.nirvdrum.lox.TokenType.*;
@@ -15,16 +15,40 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    List<Stmt> parse() {
+        var statements = new ArrayList<Stmt>();
+
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+
+        return statements;
     }
 
     private Expr expression() {
         return equality();
+    }
+
+    private Stmt statement() {
+        if (match(PRINT)) {
+            return printStatement();
+        }
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        var value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement() {
+        var expression = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+
+        return new Stmt.Expression(expression);
     }
 
     private Expr equality() {

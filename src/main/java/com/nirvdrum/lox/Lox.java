@@ -69,7 +69,7 @@ public class Lox {
         var scanner = new Scanner(source);
         var tokens = scanner.scanTokens();
         var parser = new Parser(tokens);
-        var expression = parser.parse();
+        var statements = parser.parse();
 
         // Stop if there was a syntax error.
         if (hadError) {
@@ -78,18 +78,18 @@ public class Lox {
 
         switch (mode) {
             case AST: {
-                System.out.println(new AstPrinter().print(expression));
+                System.out.println(new AstPrinter().print(statements));
                 return;
             }
 
             case EVAL: {
-                interpreter.interpret(expression);
+                interpreter.interpret(statements);
                 return;
             }
 
             case BOTH: {
-                System.out.println(new AstPrinter().print(expression));
-                interpreter.interpret(expression);
+                System.out.println(new AstPrinter().print(statements));
+                interpreter.interpret(statements);
 
                 return;
             }

@@ -1,8 +1,11 @@
 package com.nirvdrum.lox;
 
-import com.nirvdrum.lox.Expr;
+import java.util.List;
 
-public class AstPrinter implements Expr.Visitor<String> {
+public class AstPrinter implements Expr.Visitor<String>,
+                                   Stmt.Visitor<Void> {
+    private String output;
+
     public static void main(String[] args) {
         var expression = new Expr.Binary(
                 new Expr.Unary(
@@ -16,8 +19,18 @@ public class AstPrinter implements Expr.Visitor<String> {
         System.out.println(new AstPrinter().print(expression));
     }
 
-    String print(Expr expr) {
-        return expr.accept(this);
+    String print(Expr expression) {
+        return expression.accept(this);
+    }
+
+    String print(List<Stmt> statements) {
+        output = "";
+
+        for (var statement : statements) {
+            statement.accept(this);
+        }
+
+        return output;
     }
 
     private String parenthesize(String name, Expr... exprs) {
@@ -51,5 +64,19 @@ public class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator().lexeme(), expr.right());
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        output += stmt.expression().accept(this);
+
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        output += "(print " + stmt.expression().accept(this) + ")";
+
+        return null;
     }
 }
