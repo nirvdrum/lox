@@ -60,7 +60,12 @@ public class Lox {
                 break;
             }
 
-            run(mode, line);
+            try {
+                run(mode, line);
+            } catch (RuntimeException e) {
+                System.out.println("> ");
+            }
+
             hadError = false;
         }
     }
